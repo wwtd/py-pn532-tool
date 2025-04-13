@@ -76,3 +76,18 @@ class PN532:
         payload = bytes.fromhex("D4 4A 01 00")
         response = self.pn532_data_exchange(payload)
         return response
+
+    def FieldOn(self):
+        payload = bytes.fromhex("D4 32 01 01")
+        response = self.pn532_data_exchange(payload)
+        return response
+
+    def FielfOff(self):
+        payload = bytes.fromhex("D4 32 01 00")
+        response = self.pn532_data_exchange(payload)
+        return response
+
+    def GetGeneralStatus(self):
+        payload = bytes.fromhex("D4 04")
+        response = self.pn532_data_exchange(payload)
+        return response

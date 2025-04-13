@@ -7,6 +7,13 @@ if __name__ == '__main__':
         pn532.GetFirmwareVersion()
         pn532.InListPassiveTarget()
 
+        pn532.GetGeneralStatus()
+
+        pn532.FielfOff()
+        pn532.GetGeneralStatus()
+        pn532.FieldOn()
+        pn532.GetGeneralStatus()
+
         pn532.close()
 
     except Exception as e:
