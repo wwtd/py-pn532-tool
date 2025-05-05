@@ -1,6 +1,16 @@
 import serial
 import time
 
+MIFARE_CMD_AUTHENTICATE_A = 0x60
+MIFARE_CMD_AUTHENTICATE_B = 0x61
+MIFARE_CMD_16_BYTES_READ  = 0x30
+MIFARE_CMD_16_BYTES_WRITE = 0xA0
+MIFARE_CMD_4_BYTES_WRITE  = 0xA2
+MIFARE_CMD_INCREMENT      = 0xC1
+MIFARE_CMD_DECREMENT      = 0xC0
+MIFARE_CMD_TRANSFER       = 0xB0
+MIFARE_CMD_RESTORE        = 0xC2
+
 class PN532:
     def __init__(self, port, baudrate=115200, timeout=1):
         try:
@@ -91,3 +101,30 @@ class PN532:
         payload = bytes.fromhex("D4 04")
         response = self.pn532_data_exchange(payload)
         return response
+
+    def InDataExchange(self, data):
+        payload = bytes.fromhex("D4 40") + data
+        response = self.pn532_data_exchange(payload)
+        return response
+
+    def m1_authenticate(self, block, key, uid, card =0x01):
+        assert len(key) == 6
+        assert len(uid) == 4
+        # auth rule: target + 60 + block + key + uid
+        auth_cmd = bytes([card, MIFARE_CMD_AUTHENTICATE_A, block]) + key + uid
+        response = self.InDataExchange(auth_cmd)
+        if response and response[6] == 0x41 and response[7] == 0x00:
+            print("[INFO] AUTH SUCCESS")
+            return True
+        else:
+            print("[ERROR] AUTH FAIL", response)
+            return False
+
+    def m1_read_block(self, block, card =0x01):
+        read_cmd = bytes([card, MIFARE_CMD_16_BYTES_READ, block])
+        response = self.InDataExchange(read_cmd)
+        return response[-18:-2]
+
+    def m1_write_block(self, block, data, card =0x01):
+        write_cmd = bytes([card, MIFARE_CMD_16_BYTES_WRITE, block]) + data
+        response = self.InDataExchange(write_cmd)
